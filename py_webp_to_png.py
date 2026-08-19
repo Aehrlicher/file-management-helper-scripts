@@ -14,9 +14,6 @@ def _recursive_run(dir):
   cpath = loc_dir[0]
   ret = [dir]
 
-  if not dirs:
-    return [dir]
-
   for d in dirs:
     ret = ret + _recursive_run(os.path.join(cpath, d))
   return ret
@@ -79,9 +76,8 @@ for targets in target_paths:
   try:
     if(os.path.isdir(targets)):
       # If provided a directory convert all webp files in the directory
-      # get all in current directory via os.walk() iterator, but only take next object, which will be the first, a list of all files
       convert_count = 0
-      # (second then list of all sub directories) (See: https://stackoverflow.com/questions/3207219/how-do-i-list-all-files-of-a-directory)
+      # (get all contents of cwd via walk() and reduce to all webp-files) (See: https://stackoverflow.com/questions/3207219/how-do-i-list-all-files-of-a-directory)
       filenames = [x for x in next(os.walk(targets), (None, None, []))[2] if x.endswith('.webp')]
       if not filenames:
         raise Exception("Directory contains no webp-files. Skipping.")
