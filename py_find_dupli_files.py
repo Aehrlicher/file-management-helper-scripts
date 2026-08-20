@@ -14,9 +14,6 @@ def _recursive_run(dir):
   cpath = loc_dir[0]
   ret = [dir]
 
-  if not dirs:
-    return [dir]
-
   for d in dirs:
     ret = ret + _recursive_run(os.path.join(cpath, d))
   return ret
@@ -54,26 +51,26 @@ else:
 
 print("Pathes provided: '{}'".format(target_paths))
 
+# hash list and folder for tracking and storing duplicate files
+file_hash_list = set()
+dup_files_dir = os.path.join(d, "__dup_files__")
+dup_count = 0
 # Prob. don't need to log moved duplicates
 #out_file = open("duplicate_files.txt", "w")
 for d in target_paths:
-
+  tmp_dup_count = 0
   #get all files in current dir
   filelist = next(os.walk(d, onerror=report_walk_error), (None, None, []))[2]
-  dup_files_dir = os.path.join(d, "__dup_files__")
-  dup_count = 0
-  file_hash_list = set()
   for filename in filelist:
     file_path = os.path.join(d, filename)
     hashh = hash_file(file_path)
     if hashh not in file_hash_list:
       file_hash_list.add(hashh)
     else:
-      dup_count += 1
-      #make a dir to move duplicate files into if needed and not exists yet
-      if (dup_count == 1):
-        if not os.path.exists(dup_files_dir):
-          os.makedirs(dup_files_dir)
+      tmp_dup_count += 1
+      #make dir to move duplicate files into if not exists yet
+      if not os.path.exists(dup_files_dir):
+        os.makedirs(dup_files_dir)
       #move any subsequent duplicate files into the subdirectory
       dup_file_path = os.path.join(dup_files_dir, filename)
       os.replace(file_path, dup_file_path)
@@ -81,6 +78,8 @@ for d in target_paths:
 
       # out_file.write(file_path)
     #out_file.close()
-  print("Folder %56s Found %2d duplicate files in this folder." % (d, dup_count))
+  dup_count += tmp_dup_count
+  print("Folder %56s Found %2d duplicate files in this folder." % (d, tmp_dup_count))
+prin("Found %4d duplicate files in all locations.")
 print("======= END Script =======")
 os._exit(os.EX_OK)
